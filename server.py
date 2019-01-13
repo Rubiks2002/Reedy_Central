@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template
 from flask_cors import CORS
 from requests_html import HTMLSession
 
@@ -74,12 +74,13 @@ for category_title, category_id in prepsportswear_categories.items():
     links = category_response.html.absolute_links
     p = 0
     for link in links:
-        if p < 2:
+         if p < 2:
             if 'https://www.prepsportswear.com/product' in link:
                 p+=1
                 product_session = HTMLSession()
                 product_response = product_session.get(link)
                 product_response.html.render()
+                print(link)
                 product_title = product_response.html.find('h2', first=True).text
                 product_price = product_response.html.find('span.priceContent', first=True).text
                 product_img_src = product_response.html.find('img.productImage-Front', first=True).attrs['src']
