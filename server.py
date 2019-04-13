@@ -2,7 +2,6 @@ from flask import Flask, render_template
 from flask_cors import CORS
 from requests_html import HTMLSession
 
-
 app = Flask(__name__)
 CORS(app)
 app.secret_key = 'shushmans'
@@ -12,9 +11,9 @@ prepsportswear_categories = {
     'T-Shirts': '30',
     'Sweatshirts': '305',
     'Hats': '684',
-    'Men': '29',
-    'Women': '11',
-    'Youth': '89',
+    # 'Men': '29',
+    # 'Women': '11',
+    # 'Youth': '89',
     'Top Sellers': '183'
 }
 
@@ -23,9 +22,9 @@ jostens_categories = {
     'T-Shirts': 't-shirts',
     'Sweatshirts': 'sweatshirts',
     'Hats': 'hats',
-    'Men': 'mens',
-    'Women': 'womens',
-    'Youth': 'kids',
+    # 'Men': 'mens',
+    # 'Women': 'womens',
+    # 'Youth': 'kids',
     'Top Sellers': 'products'
 }
 
@@ -48,20 +47,25 @@ for category_title, category_id in jostens_categories.items():
     p = 0
     for link in links:
         # if this link leads to a product
-        if p < 2:
+        if p < 8:
             if '/product' in link and '/products' not in link:
-                p += 1
-                product_session = HTMLSession()
-                product_response = product_session.get(link)
-                product_response.html.render()
-                print(link)
-                product_title = product_response.html.find('div.col-sm-6.col-xs-12.product-header > h1', first=True).text
-                product_price = product_response.html.find('div.btdzn-add-to-cart-price', first=True).text
-                product_img_src = 'https:' + product_response.html.find('img#btdzn-product-img', first=True).attrs['src']
-                data[category_title].append({'title': product_title,
-                                             'price': product_price,
-                                             'img_src': product_img_src,
-                                             'url': link})
+                try:
+                    p += 1
+                    product_session = HTMLSession()
+                    product_response = product_session.get(link)
+                    product_response.html.render()
+                    print(link)
+                    product_title = product_response.html.find('div.col-sm-6.col-xs-12.product-header > h1',
+                                                               first=True).text
+                    product_price = product_response.html.find('div.btdzn-add-to-cart-price', first=True).text
+                    product_img_src = 'https:' + product_response.html.find('img#btdzn-product-img', first=True).attrs[
+                        'src']
+                    data[category_title].append({'title': product_title,
+                                                 'price': product_price,
+                                                 'img_src': product_img_src,
+                                                 'url': link})
+                except Exception:
+                    print('Failed boy!')
 
 # Right now this iterates only through prepsportswear.com
 # In the future, this should be adapted to function for multiple sites
@@ -74,26 +78,29 @@ for category_title, category_id in prepsportswear_categories.items():
     links = category_response.html.absolute_links
     p = 0
     for link in links:
-         if p < 2:
+        if p < 8:
             if 'https://www.prepsportswear.com/product' in link:
-                p+=1
-                product_session = HTMLSession()
-                product_response = product_session.get(link)
-                product_response.html.render()
-                print(link)
-                product_title = product_response.html.find('h2', first=True).text
-                product_price = product_response.html.find('span.priceContent', first=True).text
-                product_img_src = product_response.html.find('img.productImage-Front', first=True).attrs['src']
+                try:
+                    p += 1
+                    product_session = HTMLSession()
+                    product_response = product_session.get(link)
+                    product_response.html.render()
+                    print(link)
+                    product_title = product_response.html.find('h2', first=True).text
+                    product_price = product_response.html.find('span.priceContent', first=True).text
+                    product_img_src = product_response.html.find('img.productImage-Front', first=True).attrs['src']
 
-                data[category_title].append({'title': product_title,
-                                             'price': product_price,
-                                             'img_src': product_img_src,
-                                             'url': link})
+                    data[category_title].append({'title': product_title,
+                                                 'price': product_price,
+                                                 'img_src': product_img_src,
+                                                 'url': link})
+                except Exception:
+                    print('Error has occurred')
 
 
 @app.route('/')
-def index():
-    return render_template("home.html", data=data['T-Shirts'])
+def top_sellers():
+    return render_template("home.html", data=data['Top Sellers'])
 
 
 @app.route('/sweatshirts')
@@ -121,9 +128,9 @@ def youth():
     return render_template("home.html", data=data['Youth'])
 
 
-@app.route('/top-sellers')
-def top_sellers():
-    return render_template("home.html", data=data['Top Sellers'])
+@app.route('/tshirts')
+def tshirts():
+    return render_template("home.html", data=data['T-Shirts'])
 
 
-app.run(debug=True)
+app.run(debug=False)
